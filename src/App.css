@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+
+.rpv-default-layout__toolbar{
+  position:fixed
+}
