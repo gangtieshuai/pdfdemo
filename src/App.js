@@ -11,6 +11,14 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import './App.css'
 
 
+// 插件用的这个： https://react-pdf-viewer.dev/docs/
+
+// 其余配置都参考文档api
+
+// 打包要是报错mini-css-extract-plugin，就降低版本至2.4.0
+
+
+
 const timerString = (durTime) => {
   const hour = Math.floor(durTime / 3600)
   const minute = Math.floor(durTime / 60)
@@ -18,6 +26,7 @@ const timerString = (durTime) => {
   return `${getStr(24, hour)} : ${getStr(60, minute)} : ${getStr(60, second)}`
 }
 
+// 计时器
 const Timer = memo(props => {
   return (
     <div style={{
@@ -37,8 +46,9 @@ const Timer = memo(props => {
     </div>
   );
 });
-
+// pdf
 const Pdf = memo(props => {
+  // 文档有提pdfjs-dist 2.12.313版本的问题，请参考文档叙述
   return <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.12.313/build/pdf.worker.min.js">
     <Viewer
       fileUrl='Update.pdf'
@@ -52,7 +62,7 @@ const Pdf = memo(props => {
     />
   </Worker>
 })
-
+// 工具
 const getStr = (num, value) => {
   let a = Math.floor(value / num)
   a = value - (a * num)
@@ -134,8 +144,6 @@ function App() {
     const setArr = JSON.stringify(pagedataTime);
     const obj = JSON.parse(setArr)
     pagedataTime.map((item, index) => {
-      console.log(item);
-      console.log(pagedataTime[index - 1]);
       const seconds = index > 0 ? item - pagedataTime[index - 1] : item
       obj[index] = seconds
       return item
@@ -143,7 +151,8 @@ function App() {
     alert(JSON.stringify(obj.map(i => { return i > 0 ? `${i}s` : '0s' })))
   }
 
-  const NewFunnel = useMemo(()=> <Pdf zh_CN={zh_CN} defaultLayoutPluginInstance={defaultLayoutPluginInstance} renderPage={renderPage}
+  // 避免不必要的刷新
+  const MemoPdf = useMemo(()=> <Pdf zh_CN={zh_CN} defaultLayoutPluginInstance={defaultLayoutPluginInstance} renderPage={renderPage}
   localization={zh_CN}
   onPageChange={onPageChange}
   onDocumentLoad={onDocumentLoad} />,[])
@@ -151,7 +160,7 @@ function App() {
   return (
     <div className="App">
       <Timer onClick={onClick} readStr={readStr} />
-      {NewFunnel}
+      {MemoPdf}
     </div>
   );
 }
