@@ -1,11 +1,11 @@
-// Core viewer
+
 import React, { useEffect, useState, useRef, memo,useMemo } from 'react';
 
-import { Viewer, Worker } from '@react-pdf-viewer/core';
+import { Viewer, Worker, PdfJs   } from '@react-pdf-viewer/core';
 
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import zh_CN from '@react-pdf-viewer/locales/lib/zh_CN.json';
-
+import { Progress } from 'antd';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import './App.css'
@@ -17,7 +17,12 @@ import './App.css'
 
 // 打包要是报错mini-css-extract-plugin，就降低版本至2.4.0
 
+// 允许 PDF.js 范围请求
+// const PDF= new PDFJS()
+// PDF.disableRange = false;
 
+// // 禁止 PDF.js 预读取
+// PDF.disableAutoFetch = true;
 
 const timerString = (durTime) => {
   const hour = Math.floor(durTime / 3600)
@@ -48,13 +53,25 @@ const Timer = memo(props => {
 });
 // pdf
 const Pdf = memo(props => {
+  const url = window.location.search.replace('?url=','')
+  //https://shixiangfiles.oss-cn-hangzhou.aliyuncs.com/04f8f4ab-e69d-4b6d-a892-689444d2d23bIBM%E5%8C%BA%E5%9D%97%E9%93%BE%E6%8A%80%E6%9C%AF%EF%BC%88Blockchain%EF%BC%89%E7%AE%80%E4%BB%8B.pdf
   // 文档有提pdfjs-dist 2.12.313版本的问题，请参考文档叙述
   return <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.12.313/build/pdf.worker.min.js">
     <Viewer
-      fileUrl='Update.pdf'
+      fileUrl={url}
+      // fileUrl='http://127.0.0.1:3000/demo.pdf'
       plugins={[
         props.defaultLayoutPluginInstance
       ]}
+      // transformGetDocumentParams={(options: PdfJs.GetDocumentParams) =>
+      //       Object.assign({}, options, {
+      //           disableRange: false,
+      //           disableAutoFetch: true,
+      //       })
+      //   }
+      // httpHeaders={{
+      //     'range': '0-5',
+      // }}
       renderPage={props.renderPage}
       localization={props.zh_CN}
       onPageChange={props.onPageChange}
@@ -75,16 +92,47 @@ const getStr = (num, value) => {
 function App() {
 
   const durTime = useRef(0)
+  const durloadTime = useRef(0)
   const [timer, setTimer] = useState(null)
+  const loadtimer = useRef(null)
+  const [durloadTimeNow, setdurloadTimeNow] = useState(durloadTime.current)
+
+  const load = useRef('0')
   const [durTimeNow, setdurTimeNow] = useState(durTime.current)
   const [readStr, setRead] = useState(timerString(durTime.current))
   const [pagedataTime, setPagedataTime] = useState([])
   const [currentPage, setCurrentPage] = useState(0)
-
+  // const [percent, setPercent] = useState(0)
+  const percent = useRef(0)
+  
   useEffect(() => {
-    return () => { clearInterval(timer) }
+    return () => { 
+      clearInterval(timer)
+      clearInterval(loadtimer.current)
+    }
   }, [])
 
+ const increase = () => {
+    let percentobj = percent.current + 1;
+    if (percentobj > 100) {
+      percentobj = 100;
+      
+    }
+   
+    percent.current = percentobj
+  };
+
+  const setloadTimeString = () => {
+    loadtimer.current = setInterval(() => {
+      durloadTime.current = durloadTime.current + 1
+      setdurloadTimeNow(durloadTime.current)
+      increase()
+      if(durloadTime.current>100||load.current === '1'){
+        clearInterval(loadtimer.current)
+      }
+      console.log(percent.current);
+    }, 50)
+  }
 
   const setTimeString = () => {
     const obj = setInterval(() => {
@@ -101,6 +149,9 @@ function App() {
     setPagedataTime(arr)
   }, [durTimeNow])
 
+  useEffect(() => {
+    setloadTimeString()
+  }, [])
 
   const renderPage = (props) => (
     <>
@@ -138,7 +189,10 @@ function App() {
     sidebarTabs: (defaultTabs) => [],
   });
   const onPageChange = (e) => setCurrentPage(e.currentPage)
-  const onDocumentLoad = (e) => setTimeString()
+  const onDocumentLoad = (e) => {
+    load.current = '1'
+    setTimeString()
+  }
 
   const onClick = () => {
     const setArr = JSON.stringify(pagedataTime);
@@ -151,6 +205,8 @@ function App() {
     alert(JSON.stringify(obj.map(i => { return i > 0 ? `${i}s` : '0s' })))
   }
 
+
+
   // 避免不必要的刷新
   const MemoPdf = useMemo(()=> <Pdf zh_CN={zh_CN} defaultLayoutPluginInstance={defaultLayoutPluginInstance} renderPage={renderPage}
   localization={zh_CN}
@@ -159,8 +215,15 @@ function App() {
 
   return (
     <div className="App">
-      <Timer onClick={onClick} readStr={readStr} />
-      {MemoPdf}
+      {load.current!=='1'&&<div>
+        <Progress percent={percent.current} />
+      </div> }
+    <div>
+    <Timer onClick={onClick} readStr={readStr} />
+     {MemoPdf}
+   </div>  
+        
+     
     </div>
   );
 }
