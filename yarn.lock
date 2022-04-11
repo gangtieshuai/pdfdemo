@@ -1373,6 +1373,11 @@
   "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/core/download/@react-pdf-viewer/core-3.0.0.tgz"
   "version" "3.0.0"
 
+"@react-pdf-viewer/core@3.2.0":
+  "integrity" "sha512-lgtHANjHaPuiRAHd528cTJb+O9mplhPXzCbqdXcGdl5Sh+k6qjOfx5JozaS3OKJ9CocQ9UvPzNgVsAljwOqlzA=="
+  "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/core/-/core-3.2.0.tgz"
+  "version" "3.2.0"
+
 "@react-pdf-viewer/default-layout@^3.0.0":
   "integrity" "sha512-mOYSP+1GAGPBXX+HkfeYwmluaLFK66+YBz65nIs0iqyauPY2BIQrFK/v4y7q4LJaU6l7TdNKihUIWiiilX9zVQ=="
   "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/default-layout/download/@react-pdf-viewer/default-layout-3.0.0.tgz"
@@ -1466,9 +1471,16 @@
   dependencies:
     "@react-pdf-viewer/core" "3.0.0"
 
+"@react-pdf-viewer/thumbnail@^3.2.0":
+  "integrity" "sha512-r0IoxJunD8ZzCpws3QZWm6ZIiHM6DmQ1JtOnjQrpdcd5U9h1mBb4mUiDpT2gHrD7ETBxHGJ7PNOQlisVV2tYfg=="
+  "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/thumbnail/-/thumbnail-3.2.0.tgz"
+  "version" "3.2.0"
+  dependencies:
+    "@react-pdf-viewer/core" "3.2.0"
+
 "@react-pdf-viewer/thumbnail@3.0.0":
   "integrity" "sha512-4ProUqQXkMf+nMhEiFZOgLsQ8Ha81H2Zkv8qOnxhrUep9r+Px+CaNbKspoGXul0RjKln2HWQU0Nkq99yde/wRg=="
-  "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/thumbnail/download/@react-pdf-viewer/thumbnail-3.0.0.tgz"
+  "resolved" "https://registry.npmmirror.com/@react-pdf-viewer/thumbnail/-/thumbnail-3.0.0.tgz"
   "version" "3.0.0"
   dependencies:
     "@react-pdf-viewer/core" "3.0.0"

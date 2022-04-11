@@ -8,6 +8,7 @@
     "@react-pdf-viewer/core": "^3.0.0",
     "@react-pdf-viewer/default-layout": "^3.0.0",
     "@react-pdf-viewer/locales": "^1.0.0",
+    "@react-pdf-viewer/thumbnail": "^3.2.0",
     "@react-pdf-viewer/toolbar": "^3.0.0",
     "@react-pdf-viewer/zoom": "^3.0.0",
     "@svgr/webpack": "^5.5.0",

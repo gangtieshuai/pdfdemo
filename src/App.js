@@ -1,13 +1,15 @@
 
 import React, { useEffect, useState, useRef, memo,useMemo } from 'react';
 
-import { Viewer, Worker, PdfJs   } from '@react-pdf-viewer/core';
+import { Viewer, Worker, PdfJs,Plugin   } from '@react-pdf-viewer/core';
+import { thumbnailPlugin } from '@react-pdf-viewer/thumbnail';
 
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import zh_CN from '@react-pdf-viewer/locales/lib/zh_CN.json';
-import { Progress } from 'antd';
+import { Progress, Result } from 'antd';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import '@react-pdf-viewer/thumbnail/lib/styles/index.css';
 import './App.css'
 
 
@@ -52,8 +54,11 @@ const Timer = memo(props => {
   );
 });
 // pdf
+
 const Pdf = memo(props => {
   const url = window.location.search.replace('?url=','')
+  const { Thumbnails } =props.thumbnailPluginInstance
+  
   //https://shixiangfiles.oss-cn-hangzhou.aliyuncs.com/04f8f4ab-e69d-4b6d-a892-689444d2d23bIBM%E5%8C%BA%E5%9D%97%E9%93%BE%E6%8A%80%E6%9C%AF%EF%BC%88Blockchain%EF%BC%89%E7%AE%80%E4%BB%8B.pdf
   // 文档有提pdfjs-dist 2.12.313版本的问题，请参考文档叙述
   return <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.12.313/build/pdf.worker.min.js">
@@ -61,22 +66,32 @@ const Pdf = memo(props => {
       fileUrl={url}
       // fileUrl='http://127.0.0.1:3000/demo.pdf'
       plugins={[
-        props.defaultLayoutPluginInstance
+        props.defaultLayoutPluginInstance,
+        props.thumbnailPluginInstance
       ]}
-      // transformGetDocumentParams={(options: PdfJs.GetDocumentParams) =>
-      //       Object.assign({}, options, {
-      //           disableRange: false,
-      //           disableAutoFetch: true,
-      //       })
-      //   }
+      transformGetDocumentParams={(options) =>
+            Object.assign({}, options, {
+                disableRange: false,
+                disableAutoFetch: true,
+            })
+        }
       // httpHeaders={{
       //     'range': '0-5',
       // }}
+      renderError={()=>{
+        props.loadError()
+        return (<Result
+          status="500"
+          title="文件加载错误"
+          subTitle="请稍后重试."
+        />)
+      }}
       renderPage={props.renderPage}
       localization={props.zh_CN}
       onPageChange={props.onPageChange}
       onDocumentLoad={props.onDocumentLoad}
     />
+    <Thumbnails />
   </Worker>
 })
 // 工具
@@ -97,7 +112,8 @@ function App() {
   const loadtimer = useRef(null)
   const [durloadTimeNow, setdurloadTimeNow] = useState(durloadTime.current)
 
-  const load = useRef('0')
+  const load = useRef('')
+  const error = useRef('')
   const [durTimeNow, setdurTimeNow] = useState(durTime.current)
   const [readStr, setRead] = useState(timerString(durTime.current))
   const [pagedataTime, setPagedataTime] = useState([])
@@ -127,7 +143,7 @@ function App() {
       durloadTime.current = durloadTime.current + 1
       setdurloadTimeNow(durloadTime.current)
       increase()
-      if(durloadTime.current>100||load.current === '1'){
+      if(durloadTime.current>100||load.current === '1'||load.current === '0'){
         clearInterval(loadtimer.current)
       }
       console.log(percent.current);
@@ -188,6 +204,7 @@ function App() {
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
     sidebarTabs: (defaultTabs) => [],
   });
+  const thumbnailPluginInstance = thumbnailPlugin();
   const onPageChange = (e) => setCurrentPage(e.currentPage)
   const onDocumentLoad = (e) => {
     load.current = '1'
@@ -208,18 +225,20 @@ function App() {
 
 
   // 避免不必要的刷新
-  const MemoPdf = useMemo(()=> <Pdf zh_CN={zh_CN} defaultLayoutPluginInstance={defaultLayoutPluginInstance} renderPage={renderPage}
+  const MemoPdf = useMemo(()=> <Pdf loadError={()=>{
+    load.current='0'
+  }} zh_CN={zh_CN} thumbnailPluginInstance={thumbnailPluginInstance} defaultLayoutPluginInstance={defaultLayoutPluginInstance} renderPage={renderPage}
   localization={zh_CN}
   onPageChange={onPageChange}
   onDocumentLoad={onDocumentLoad} />,[])
 
   return (
     <div className="App">
-      {load.current!=='1'&&<div>
+      {(load.current!=='1'&&load.current!=='0')&&<div>
         <Progress percent={percent.current} />
       </div> }
     <div>
-    <Timer onClick={onClick} readStr={readStr} />
+      {load.current!=='0'&&<Timer onClick={onClick} readStr={readStr} />}
      {MemoPdf}
    </div>  
         
